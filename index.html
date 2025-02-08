@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CigaTuan</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        h1 { color: #007bff; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; }
+        h1 .arrow { margin-left: 5px; font-size: 14px; }
+        .dropdown { display: none; position: absolute; top: 40px; background: white; box-shadow: 0px 4px 8px rgba(0,0,0,0.2); border-radius: 5px; padding: 10px; z-index: 10; }
+        .dropdown a, .dropdown div { display: block; padding: 10px; text-decoration: none; color: black; cursor: pointer; }
+        .dropdown a:hover, .dropdown div:hover { background: #f0f0f0; }
+        .hidden { display: none; }
+        .donate-box { padding: 10px; text-align: left; }
+        .donate-box button { margin-top: 5px; padding: 5px 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <h1 onclick="toggleMenu()">CigaTuan <span class="arrow">▼</span>
+        <div class="dropdown" id="menu">
+            <a href="https://www.facebook.com/tuan.nguyen.133171/" target="_blank">Facebook</a>
+            <div onclick="toggleDonate()">Donate</div>
+        </div>
+    </h1>
+    <h2>Chọn file CSV để học từ vựng</h2>
+
+    <div class="hidden" id="donate-box">
+        <h3>Thông tin Donate</h3>
+        <p><b>Ngân hàng:</b> BIDV</p>
+        <p><b>Chủ tài khoản:</b> Nguyễn Anh Tuấn</p>
+        <p><b>Số tài khoản:</b> <span id="bank-account">6360362786</span>
+            <button onclick="copyAccount()">📋 Sao chép</button>
+        </p>
+    </div>
+
+    <input type="file" id="csvFile" accept=".csv">
+    <button onclick="loadCSV()">Tải File</button>
+    <button onclick="resetFile()">Chọn File Khác</button>
+
+    <div class="button-container">
+        <button onclick="startLearning()" id="startButton" style="display: none;">Bắt đầu học</button>
+        <button onclick="restartLearning()" id="restartButton" style="display: none;">Học lại từ đầu</button>
+    </div>
+
+    <div id="quiz-container">
+        <p id="question"></p>
+        <input type="text" id="answer" placeholder="Nhập từ tiếng Anh" autocomplete="off" />
+        <button onclick="checkAnswer()">Kiểm tra</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        let words = [];
+        let currentIndex = 0;
+
+        function loadCSV() {
+            let fileInput = document.getElementById("csvFile");
+            let file = fileInput.files[0];
+
+            if (!file) {
+                alert("Vui lòng chọn một file CSV!");
+                return;
+            }
+
+            let reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function(event) {
+                let csvData = event.target.result;
+                parseCSV(csvData);
+            };
+        }
+
+        function parseCSV(data) {
+            let rows = data.split("\n").map(row => row.split(","));
+            
+            // Giả sử cột 1 là Tiếng Anh, cột 2 là Tiếng Việt
+            words = rows.slice(1).map(row => ({
+                Vietnamese: row[1]?.trim(),
+                English: row[0]?.trim()
+            })).filter(word => word.Vietnamese && word.English);
+
+            if (words.length > 0) {
+                document.getElementById("startButton").style.display = "inline-block";
+                document.getElementById("restartButton").style.display = "inline-block";
+                alert("Tải dữ liệu thành công! Bấm 'Bắt đầu học' để tiếp tục.");
+            } else {
+                alert("Lỗi khi đọc file. Vui lòng kiểm tra định dạng CSV!");
+            }
+        }
+
+        function startLearning() {
+            document.getElementById("quiz-container").style.display = "block";
+            currentIndex = 0;
+            loadQuestion();
+        }
+
+        function restartLearning() {
+            currentIndex = 0;
+            loadQuestion();
+        }
+
+        function resetFile() {
+            location.reload(); // Tải lại trang để chọn file khác
+        }
+
+        function loadQuestion() {
+            if (currentIndex < words.length) {
+                document.getElementById("question").innerText = "Tiếng Việt: " + words[currentIndex].Vietnamese;
+                document.getElementById("answer").value = "";
+                document.getElementById("result").innerText = "";
+            } else {
+                document.getElementById("quiz-container").innerHTML = "<h3>Bạn đã hoàn thành bài học!</h3>";
+            }
+        }
+
+        function checkAnswer() {
+            let userAnswer = document.getElementById("answer").value.trim();
+            let correctAnswer = words[currentIndex].English;
+
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                document.getElementById("result").innerText = "✅ Chính xác!";
+            } else {
+                document.getElementById("result").innerText = "❌ Sai! Đáp án đúng: " + correctAnswer;
+            }
+
+            // Sau 1 giây tự động chuyển sang từ tiếp theo
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1000);
+        }
+        function toggleMenu() {
+            let menu = document.getElementById("menu");
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        function toggleDonate() {
+            let donateBox = document.getElementById("donate-box");
+            donateBox.classList.toggle("hidden");
+        }
+
+        function copyAccount() {
+            let accountText = document.getElementById("bank-account").innerText;
+            navigator.clipboard.writeText(accountText);
+            alert("Đã sao chép số tài khoản!");
+        }
+    </script>
+
+</body>
+</html>
