@@ -14,6 +14,21 @@
         .hidden { display: none; }
         .donate-box { padding: 10px; text-align: left; }
         .donate-box button { margin-top: 5px; padding: 5px 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 3px; }
+        .profile-pic {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -25,6 +40,11 @@
         </div>
     </h1>
     <h2>Chọn file CSV để học từ vựng</h2>
+
+    <!-- Ảnh đại diện Facebook -->
+    <div class="profile-pic">
+        <img id="avatar" src="https://graph.facebook.com/tuan.nguyen.133171/picture?type=large" alt="Avatar">
+    </div>
 
     <div class="hidden" id="donate-box">
         <h3>Thông tin Donate</h3>
@@ -146,6 +166,11 @@
             navigator.clipboard.writeText(accountText);
             alert("Đã sao chép số tài khoản!");
         }
+        function updateAvatar() {
+            let avatar = document.getElementById("avatar");
+            avatar.src = `https://graph.facebook.com/tuan.nguyen.133171/picture?type=large&timestamp=${new Date().getTime()}`;
+        }
+        setInterval(updateAvatar, 60000); // Cập nhật ảnh mỗi phút
     </script>
 
 </body>
